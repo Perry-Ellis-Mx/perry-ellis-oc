@@ -650,20 +650,24 @@ function clearAll(){
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  document.getElementById("dropZone").addEventListener("dragover",function(e){e.preventDefault();this.classList.add("dragover");});
-  document.getElementById("dropZone").addEventListener("dragleave",function(){this.classList.remove("dragover");});
-  document.getElementById("dropZone").addEventListener("drop",function(e){e.preventDefault();this.classList.remove("dragover");processFiles(Array.from(e.dataTransfer.files));});
-  document.getElementById("fileInput").addEventListener("change",function(e){processFiles(Array.from(e.target.files));});
-  document.getElementById("si").addEventListener("input",renderTable);
-  document.getElementById("fp").addEventListener("change",renderTable);
-  document.getElementById("ff").addEventListener("change",renderTable);
-  document.getElementById("tb").addEventListener("click",function(e){
+  function addEL(id, event, fn) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener(event, fn);
+  }
+  addEL("dropZone","dragover",function(e){e.preventDefault();this.classList.add("dragover");});
+  addEL("dropZone","dragleave",function(){this.classList.remove("dragover");});
+  addEL("dropZone","drop",function(e){e.preventDefault();this.classList.remove("dragover");processFiles(Array.from(e.dataTransfer.files));});
+  addEL("fileInput","change",function(e){processFiles(Array.from(e.target.files));});
+  addEL("si","input",renderTable);
+  addEL("fp","change",renderTable);
+  addEL("ff","change",renderTable);
+  addEL("tb","click",function(e){
     if(e.target&&e.target.classList.contains("xr")){
       var gi=parseInt(e.target.getAttribute("data-gi"));
       if(!isNaN(gi)){allRows.splice(gi,1);updateUI();}
     }
   });
-  document.getElementById("chips").addEventListener("click",function(e){
+  addEL("chips","click",function(e){
     if(e.target&&e.target.classList.contains("xf")){
       var fn=e.target.getAttribute("data-file");
       if(fn) deleteByFile(fn);
