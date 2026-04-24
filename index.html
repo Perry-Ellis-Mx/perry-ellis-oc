@@ -224,15 +224,7 @@ function loadFromCloud() {
       updateUI();
       showBanner();
       showStatus("ok", rows.length + " registros cargados correctamente");
-      // Esperar a que Chart.js cargue completamente
-      function tryRenderResumen(intentos) {
-        if (typeof Chart !== "undefined") {
-          renderResumen();
-        } else if (intentos > 0) {
-          setTimeout(function(){ tryRenderResumen(intentos-1); }, 300);
-        }
-      }
-      tryRenderResumen(20);
+      renderResumenWhenReady();
     })
     .catch(function(err){
       showStatus("err", "Error de conexion - intenta de nuevo");
@@ -452,50 +444,31 @@ function setEl(id, val, prop) {
 }
 
 function updateUI(){
-  setEl("fb", "block", "display");
-  setEl("fb", fileCount+" archivo"+(fileCount!==1?"s":"")+" cargado"+(fileCount!==1?"s":""));
-  setEl("bc", fileCount);
-  setEl("bd", allRows.length.toLocaleString("es-MX"));
-  setEl("sF", fileCount);
-  setEl("sR", allRows.length.toLocaleString("es-MX"));
+  setEl("fb","block","display");
+  setEl("fb",fileCount+" archivo"+(fileCount!==1?"s":"")+" cargado"+(fileCount!==1?"s":""));
+  setEl("bc",fileCount);
+  setEl("bd",allRows.length.toLocaleString("es-MX"));
+  setEl("sF",fileCount);
+  setEl("sR",allRows.length.toLocaleString("es-MX"));
   var ps={};
   for(var i=0;i<allRows.length;i++){if(allRows[i].proveedor&&allRows[i].proveedor!=="-")ps[allRows[i].proveedor]=true;}
   var pvs=Object.keys(ps).sort();
-  setEl("sP", pvs.length);
+  setEl("sP",pvs.length);
   var tp=0,ta=0;
   for(var i=0;i<allRows.length;i++){tp+=(allRows[i].cantidad||0);ta+=(allRows[i].total||0);}
-  setEl("sQ", tp>0?fmtI(tp):"-");
-  setEl("sT", ta>0?"$"+fmt(ta):"-");
+  setEl("sQ",tp>0?fmtI(tp):"-");
+  setEl("sT",ta>0?"$"+fmt(ta):"-");
   var ps2=document.getElementById("fp");
-  ps2.innerHTML="<option value=\"\">"+"Todos los proveedores</option>";
-  for(var i=0;i<pvs.length;i++){var o=document.createElement("option");o.value=pvs[i];o.textContent=pvs[i];ps2.appendChild(o);}
+  if(ps2){ps2.innerHTML="<option value=\"\">Todos los proveedores</option>";for(var i=0;i<pvs.length;i++){var o=document.createElement("option");o.value=pvs[i];o.textContent=pvs[i];ps2.appendChild(o);}}
   var fs={};
   for(var i=0;i<allRows.length;i++) fs[allRows[i].archivo]=true;
   var fns=Object.keys(fs);
   var ps3=document.getElementById("ff");
-  ps3.innerHTML="<option value=\"\">"+"Todos los archivos</option>";
-  for(var i=0;i<fns.length;i++){var o=document.createElement("option");o.value=fns[i];o.textContent=fns[i];ps3.appendChild(o);}
+  if(ps3){ps3.innerHTML="<option value=\"\">Todos los archivos</option>";for(var i=0;i<fns.length;i++){var o=document.createElement("option");o.value=fns[i];o.textContent=fns[i];ps3.appendChild(o);}}
   var sec=document.getElementById("lsec");
-  sec.style.display="block";
+  if(sec) sec.style.display="block";
   var chips=document.getElementById("chips");
-  chips.innerHTML="";
-  for(var name in loadedFiles){
-    var chip=document.createElement("span");
-    chip.className="chip";
-    var dot=document.createElement("span");
-    dot.className="dot ok";
-    var lbl=document.createElement("span");
-    lbl.textContent=name;
-    var xbtn=document.createElement("button");
-    xbtn.className="xf";
-    xbtn.textContent="x";
-    xbtn.title="Eliminar este archivo";
-    xbtn.setAttribute("data-file",cleanName(name));
-    chip.appendChild(dot);
-    chip.appendChild(lbl);
-    chip.appendChild(xbtn);
-    chips.appendChild(chip);
-  }
+  if(chips){chips.innerHTML="";for(var name in loadedFiles){var chip=document.createElement("span");chip.className="chip";var dot=document.createElement("span");dot.className="dot ok";var lbl=document.createElement("span");lbl.textContent=name;var xbtn=document.createElement("button");xbtn.className="xf";xbtn.textContent="x";xbtn.title="Eliminar";xbtn.setAttribute("data-file",cleanName(name));chip.appendChild(dot);chip.appendChild(lbl);chip.appendChild(xbtn);chips.appendChild(chip);}}
   renderTable();
   showBanner();
 }
