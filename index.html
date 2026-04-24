@@ -100,39 +100,11 @@ footer{text-align:center;padding:2rem;color:var(--tx3);font-size:.65rem;letter-s
   </div>
 </header>
 <nav class="tnav">
-  <button class="tb active" id="tabCargar" onclick="switchTab('Cargar')">Cargar <span class="ti" id="bc">0</span></button>
+  <button class="tb active" id="tabResumen" onclick="switchTab('Resumen')">Resumen</button>
   <button class="tb" id="tabDetalle" onclick="switchTab('Detalle')">Detalle <span class="ti" id="bd">0</span></button>
-  <button class="tb" id="tabResumen" onclick="switchTab('Resumen')">Resumen</button>
 </nav>
 <main>
-<div class="panel active" id="panelCargar">
-  <div id="savedBanner" style="display:none;align-items:center;justify-content:space-between;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1rem;gap:1rem;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span style="width:8px;height:8px;border-radius:50%;background:#4a9e6a;flex-shrink:0;display:inline-block;"></span>
-      <span style="font-size:.82rem;font-weight:600;color:#f0f0f0;">Datos guardados localmente &mdash; <span class="sb-count"></span></span>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn" onclick="switchTab('Detalle')" style="font-size:.75rem;padding:5px 14px;">Ver Detalle</button>
-      <button class="btn dn" onclick="clearAll()" style="font-size:.75rem;padding:5px 14px;">Limpiar todo</button>
-    </div>
-  </div>
-  <div id="savedBanner" style="display:none;align-items:center;justify-content:space-between;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:1rem 1.5rem;margin-bottom:1rem;gap:1rem;"><div style="display:flex;align-items:center;gap:10px;"><span style="width:8px;height:8px;border-radius:50%;background:#4a9e6a;display:inline-block;"></span><span style="font-size:.82rem;font-weight:600;color:#f0f0f0;">Datos en la nube &mdash; <span class="sb-count"></span></span></div><div style="display:flex;gap:8px;"><button class="btn" onclick="switchTab('Detalle')" style="font-size:.75rem;padding:5px 14px;">Ver Detalle</button><button class="btn" onclick="loadFromCloud()" style="font-size:.75rem;padding:5px 14px;">Actualizar</button><button class="btn dn" onclick="clearAll()" style="font-size:.75rem;padding:5px 14px;">Limpiar todo</button></div></div>
-  <div id="statusMsg" style="text-align:center;font-size:.78rem;font-weight:600;min-height:1.2rem;margin-bottom:.5rem;"></div>
-  <div class="dz" id="dropZone">
-    <input type="file" id="fileInput" multiple accept=".xlsx,.xls,.csv"/>
-    <div class="ui"><svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg></div>
-    <h2>Seleccionar archivos de la carpeta Resurtidos</h2>
-    <p>Arrastra y suelta archivos .xlsx, o haz clic para seleccionarlos</p>
-    <span class="hint">Los archivos ya cargados se omiten automaticamente</span>
-    <div class="pb" id="pb"><div class="f" id="pf" style="width:0%"></div></div>
-    <div class="fl" id="fl"></div>
-  </div>
-  <div class="lsec" id="lsec">
-    <h3>Archivos en sesion</h3>
-    <div id="chips"></div>
-    <div style="margin-top:1rem"><button class="btn dn" onclick="clearAll()">Limpiar todo</button></div>
-  </div>
-</div>
+
 <div class="panel" id="panelDetalle">
   <div class="sr">
     <div class="sc hi"><div class="lb">Modelos</div><div class="vl" id="sR">0</div></div>
@@ -162,10 +134,10 @@ footer{text-align:center;padding:2rem;color:var(--tx3);font-size:.65rem;letter-s
       <th id="ht" onclick="sortTable('total')" style="text-align:right">Total Costo</th>
       <th style="text-align:center">Eliminar</th>
     </tr></thead>
-    <tbody id="tb"><tr><td colspan="12"><div class="es">Cargando datos... Si no aparecen, haz clic en <strong>Actualizar</strong> arriba.</div></td></tr></tbody>
+    <tbody id="tb"><tr><td colspan="12"><div class="es">Cargando datos de la nube...</div></td></tr></tbody>
   </table></div></div>
 </div>
-<div class="panel" id="panelResumen">
+<div class="panel active" id="panelResumen">
   <div class="rg">
     <div class="cc"><h3>Total Costo por Proveedor</h3><canvas id="cC"></canvas></div>
     <div class="cc"><h3>Total Piezas por Proveedor</h3><canvas id="cP"></canvas></div>
@@ -315,6 +287,7 @@ function switchTab(t){
   document.getElementById("panel"+t).classList.add("active");
   if(t==="Resumen") renderResumen();
   if(t==="Detalle" && allRows.length===0) loadFromCloud();
+  setTimeout(function(){ if(allRows.length>0) renderResumen(); }, 2000);
 }
 
 function isXLS(n){var l=n.toLowerCase();return l.endsWith(".xlsx")||l.endsWith(".xls")||l.endsWith(".csv");}
@@ -607,8 +580,17 @@ function renderResumen(){
   document.getElementById("rb").innerHTML=html;
   var labels=[],costos=[],piezas=[];
   for(var i=0;i<sorted.length;i++){labels.push(sorted[i]);costos.push(Math.round(map[sorted[i]].t));piezas.push(Math.round(map[sorted[i]].q));}
-  var gr=["#ffffff","#cccccc","#aaaaaa","#888888","#666666","#444444"];
-  var cols=labels.map(function(_,i){return gr[i%gr.length];});
+  // Llenar tarjetas de totales
+  var totalArchivos = {};
+  for(var i=0;i<rows.length;i++) totalArchivos[rows[i].archivo]=true;
+  document.getElementById("rTotalModelos").textContent = rows.length.toLocaleString("es-MX");
+  document.getElementById("rTotalArchivos").textContent = Object.keys(totalArchivos).length;
+  document.getElementById("rTotalProveedores").textContent = sorted.length;
+  document.getElementById("rTotalPiezas").textContent = Math.round(tq).toLocaleString("es-MX");
+  document.getElementById("rTotalCosto").textContent = "$"+fmt(tt);
+
+  // Todas las barras en blanco
+  var cols = labels.map(function(){ return "#ffffff"; });
   var opts={responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:"#888",font:{family:"Nunito Sans",size:11}},grid:{color:"#1a1a1a"}},y:{ticks:{color:"#888",font:{family:"Nunito Sans",size:11}},grid:{color:"#1a1a1a"}}}};
   if(chCosto) chCosto.destroy();
   if(chPiezas) chPiezas.destroy();
@@ -677,6 +659,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
   loadFromCloud();
+  setTimeout(function(){ if(allRows.length>0) renderResumen(); }, 2000);
 });
 </script>
 </body>
