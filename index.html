@@ -224,7 +224,15 @@ function loadFromCloud() {
       updateUI();
       showBanner();
       showStatus("ok", rows.length + " registros cargados correctamente");
-      renderResumen();
+      // Esperar a que Chart.js cargue completamente
+      function tryRenderResumen(intentos) {
+        if (typeof Chart !== "undefined") {
+          renderResumen();
+        } else if (intentos > 0) {
+          setTimeout(function(){ tryRenderResumen(intentos-1); }, 300);
+        }
+      }
+      tryRenderResumen(20);
     })
     .catch(function(err){
       showStatus("err", "Error de conexion - intenta de nuevo");
@@ -286,7 +294,10 @@ function switchTab(t){
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active");});
   document.getElementById("tab"+t).classList.add("active");
   document.getElementById("panel"+t).classList.add("active");
-  if(t==="Resumen") renderResumen();
+  if(t==="Resumen"){
+    if(typeof Chart !== "undefined") renderResumen();
+    else setTimeout(function(){ renderResumen(); }, 500);
+  }
   if(t==="Detalle" && allRows.length===0) loadFromCloud();
 }
 
