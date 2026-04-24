@@ -281,6 +281,16 @@ function showStatus(type, msg) {
 }
 
 
+function renderResumenWhenReady(){
+  if(typeof Chart !== "undefined" && allRows.length > 0){
+    renderResumen();
+  } else if(allRows.length === 0){
+    setTimeout(renderResumenWhenReady, 400);
+  } else {
+    renderResumen();
+  }
+}
+
 function switchTab(t){
   document.querySelectorAll(".tb").forEach(function(b){b.classList.remove("active");});
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("active");});
@@ -570,14 +580,20 @@ function renderResumen(){
   document.getElementById("rb").innerHTML=html;
   var labels=[],costos=[],piezas=[];
   for(var i=0;i<sorted.length;i++){labels.push(sorted[i]);costos.push(Math.round(map[sorted[i]].t));piezas.push(Math.round(map[sorted[i]].q));}
-  // Llenar tarjetas de totales
+  // Llenar tarjetas de totales (verificar existencia)
   var totalArchivos = {};
   for(var i=0;i<rows.length;i++) totalArchivos[rows[i].archivo]=true;
-  document.getElementById("rTotalModelos").textContent = rows.length.toLocaleString("es-MX");
-  document.getElementById("rTotalArchivos").textContent = Object.keys(totalArchivos).length;
-  document.getElementById("rTotalProveedores").textContent = sorted.length;
-  document.getElementById("rTotalPiezas").textContent = Math.round(tq).toLocaleString("es-MX");
-  document.getElementById("rTotalCosto").textContent = "$"+fmt(tt);
+  setEl("rTotalModelos", rows.length.toLocaleString("es-MX"));
+  setEl("rTotalArchivos", Object.keys(totalArchivos).length);
+  setEl("rTotalProveedores", sorted.length);
+  setEl("rTotalPiezas", Math.round(tq).toLocaleString("es-MX"));
+  setEl("rTotalCosto", "$"+fmt(tt));
+
+  // Gráficas - verificar que Chart.js y canvas existen
+  if(typeof Chart === "undefined") return;
+  var cCel = document.getElementById("cC");
+  var cPel = document.getElementById("cP");
+  if(!cCel || !cPel) return;
 
   // Todas las barras en blanco
   var cols = labels.map(function(){ return "#ffffff"; });
